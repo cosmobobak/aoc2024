@@ -7,13 +7,10 @@ pub fn task01() {
     let start = std::time::Instant::now();
     let task = include_str!("../tasks/task01.txt");
 
-    // part one structures
-    let mut q1 = BinaryHeap::new();
-    let mut q2 = BinaryHeap::new();
-
-    // part two structures
-    let mut xs = Vec::new();
-    let mut counts = HashMap::new();
+    let mut ls = Vec::new();
+    let mut rs = Vec::new();
+    let mut keys = Vec::new();
+    let mut vals = Vec::new();
 
     for line in task.lines() {
         let [l, r] = line
@@ -25,26 +22,39 @@ pub fn task01() {
             unreachable!();
         };
 
-        q1.push(l);
-        q2.push(r);
+        ls.push(l);
+        rs.push(r);
 
-        xs.push(l);
-        counts.entry(r).and_modify(|c| *c += 1).or_insert(1);
+        if let Some(i) = keys.iter().position(|&k| k == r) {
+            vals[i] += 1;
+        } else {
+            keys.push(r);
+            vals.push(1);
+        }
     }
 
-    let mut sum = 0;
-    while let Some((a, b)) = q1.pop().zip(q2.pop()) {
-        sum += a.abs_diff(b);
-    }
+    ls.sort_unstable();
+    rs.sort_unstable();
 
-    println!("Part 1: {sum}");
-
-    let sum = xs
+    let diff_sum = ls
         .iter()
-        .map(|v| v * counts.get(v).unwrap_or(&0))
+        .zip(&rs)
+        .map(|(&a, &b)| i32::abs_diff(a, b))
+        .sum::<u32>();
+
+    println!("Part 1: {diff_sum}");
+
+    let count_sum = ls
+        .iter()
+        .map(|&v| {
+            keys
+                .iter()
+                .position(|&k| k == v)
+                .map_or(0, |i| vals[i]) * v
+        })
         .sum::<i32>();
 
-    println!("Part 2: {sum}");
+    println!("Part 2: {count_sum}");
 
     let elapsed = start.elapsed();
     println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
