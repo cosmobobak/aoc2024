@@ -1,5 +1,4 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::cargo)]
-#![allow(unused_imports, dead_code)]
 
 mod task01;
 // mod task02;

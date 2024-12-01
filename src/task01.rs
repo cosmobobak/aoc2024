@@ -1,7 +1,3 @@
-use std::{
-    collections::{BinaryHeap, HashMap},
-    ops::AddAssign,
-};
 
 pub fn task01() {
     let start = std::time::Instant::now();
@@ -46,12 +42,7 @@ pub fn task01() {
 
     let count_sum = ls
         .iter()
-        .map(|&v| {
-            keys
-                .iter()
-                .position(|&k| k == v)
-                .map_or(0, |i| vals[i]) * v
-        })
+        .map(|&v| v * keys.iter().position(|&k| k == v).map_or(0, |i| vals[i]))
         .sum::<i32>();
 
     println!("Part 2: {count_sum}");
