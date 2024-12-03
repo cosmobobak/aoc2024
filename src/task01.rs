@@ -38,13 +38,12 @@ pub fn task01() {
         .map(|(&a, &b)| i32::abs_diff(a, b))
         .sum::<u32>();
 
-    println!("Part 1: {diff_sum}");
-
     let count_sum = ls
         .iter()
         .map(|&v| v * keys.iter().position(|&k| k == v).map_or(0, |i| vals[i]))
         .sum::<i32>();
 
+    println!("Part 1: {diff_sum}");
     println!("Part 2: {count_sum}");
 
     let elapsed = start.elapsed();
