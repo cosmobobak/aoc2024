@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.93"
 arrayvec = "0.7.6"
+nom = "7.1.3"

@@ -8,7 +8,7 @@ pub fn task02() {
         let nums = line
             .split_whitespace()
             .map(str::parse)
-            .collect::<Result<ArrayVec<usize, 16>, _>>()
+            .collect::<Result<ArrayVec<i16, 16>, _>>()
             .unwrap();
 
         let mut eliminations = (0..=nums.len()).rev();
