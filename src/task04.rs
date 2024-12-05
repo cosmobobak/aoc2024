@@ -1,11 +1,8 @@
-
-fn raycast<const X_INC: isize, const Y_INC: isize>(x: isize, y: isize) -> impl Iterator<Item = (isize, isize)> {
-    (0..4).map(move |i| {
-        (
-            x + X_INC * i,
-            y + Y_INC * i,
-        )
-    })
+fn raycast<const X_INC: isize, const Y_INC: isize>(
+    x: isize,
+    y: isize,
+) -> impl Iterator<Item = (isize, isize)> {
+    (0..4).map(move |i| (x + X_INC * i, y + Y_INC * i))
 }
 
 fn seq(is: impl Iterator<Item = (isize, isize)>, grid: &[&[u8]]) -> Option<[u8; 4]> {
@@ -21,9 +18,7 @@ pub fn task04() {
     let start = std::time::Instant::now();
     let task = include_bytes!("../tasks/task04.txt");
 
-    let grid = task
-        .split(|b| *b == b'\n')
-        .collect::<Vec<_>>();
+    let grid = task.split(|b| *b == b'\n').collect::<Vec<_>>();
 
     let mut sum = 0;
 
@@ -48,7 +43,11 @@ pub fn task04() {
     // for each sequence of three rows:
     for row3 in grid.windows(3) {
         // for each window of three values:
-        for ((a, b), c) in row3[0].windows(3).zip(row3[1].windows(3)).zip(row3[2].windows(3)) {
+        for ((a, b), c) in row3[0]
+            .windows(3)
+            .zip(row3[1].windows(3))
+            .zip(row3[2].windows(3))
+        {
             // check if it matches the desired patterns:
             let diag1 = [a[0], b[1], c[2]];
             let diag2 = [a[2], b[1], c[0]];
