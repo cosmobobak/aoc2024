@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 use nom::{
     character::complete::{char, digit1},
     IResult,
@@ -20,7 +22,7 @@ fn parse_pair(input: &[u8]) -> IResult<&[u8], (i32, i32)> {
     Ok((input, (num1, num2)))
 }
 
-pub fn task03() {
+pub fn task03() -> Result<()> {
     let start = std::time::Instant::now();
     let task = include_bytes!("../tasks/task03.txt");
 
@@ -53,4 +55,6 @@ pub fn task03() {
 
     let elapsed = start.elapsed();
     println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
+
+    Ok(())
 }

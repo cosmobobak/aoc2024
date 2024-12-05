@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 fn raycast<const X_INC: isize, const Y_INC: isize>(
     x: isize,
     y: isize,
@@ -14,7 +16,7 @@ fn seq(is: impl Iterator<Item = (isize, isize)>, grid: &[&[u8]]) -> Option<[u8; 
     Some(v)
 }
 
-pub fn task04() {
+pub fn task04() -> Result<()> {
     let start = std::time::Instant::now();
     let task = include_bytes!("../tasks/task04.txt");
 
@@ -61,4 +63,6 @@ pub fn task04() {
 
     let elapsed = start.elapsed();
     println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
+
+    Ok(())
 }

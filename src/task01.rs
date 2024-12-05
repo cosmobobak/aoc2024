@@ -1,5 +1,6 @@
+use anyhow::{bail, Result};
 
-pub fn task01() {
+pub fn task01() -> Result<()> {
     let start = std::time::Instant::now();
     let task = include_str!("../tasks/task01.txt");
 
@@ -12,10 +13,9 @@ pub fn task01() {
         let [l, r] = line
             .split_whitespace()
             .map(str::parse)
-            .collect::<Result<Vec<i32>, _>>()
-            .unwrap()[..]
+            .collect::<Result<Vec<i32>, _>>()?[..]
         else {
-            unreachable!();
+            bail!("unreachable code.");
         };
 
         ls.push(l);
@@ -48,4 +48,6 @@ pub fn task01() {
 
     let elapsed = start.elapsed();
     println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
+
+    Ok(())
 }
