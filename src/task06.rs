@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 
 pub fn task06() -> Result<()> {
     let start = std::time::Instant::now();
-    // let task = include_str!("../tasks/task05.txt");
+    // let task = include_str!("../tasks/task06.txt");
 
     // println!("Part 1: {}");
     // println!("Part 2: {}");
