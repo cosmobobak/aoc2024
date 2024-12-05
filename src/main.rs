@@ -14,5 +14,5 @@ use task04::task04;
 use task05::task05;
 
 fn main() {
-    task04();
+    task05().unwrap();
 }
