@@ -121,11 +121,10 @@ fn exec<const PART_2: bool>(
                 let min = guard_pos.0.min(new_row);
                 let max = guard_pos.0.max(new_row);
                 for r in min..=max {
-                    if PART_2 && !states.insert((dir, r, guard_pos.1)) {
-                        return true; // repeat found
-                    }
-
                     acc((r, guard_pos.1));
+                }
+                if PART_2 && !states.insert((dir, max, guard_pos.1)) {
+                    return true; // repeat found
                 }
                 guard_pos.0 = new_row;
             }
@@ -147,11 +146,10 @@ fn exec<const PART_2: bool>(
                 let min = guard_pos.1.min(new_col);
                 let max = guard_pos.1.max(new_col);
                 for c in min..=max {
-                    if PART_2 && !states.insert((dir, guard_pos.0, c)) {
-                        return true; // repeat found
-                    }
-
                     acc((guard_pos.0, c));
+                }
+                if PART_2 && !states.insert((dir, guard_pos.0, max)) {
+                    return true; // repeat found
                 }
                 guard_pos.1 = new_col;
             }
