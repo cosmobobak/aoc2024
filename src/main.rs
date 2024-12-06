@@ -1,15 +1,18 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![allow(dead_code, unused_imports, clippy::unnecessary_wraps)]
 
+mod bucket;
 mod task01;
 mod task02;
 mod task03;
 mod task04;
 mod task05;
 mod task06;
-mod bucket;
 
-use std::{fmt::Display, time::{Duration, Instant}};
+use std::{
+    fmt::Display,
+    time::{Duration, Instant},
+};
 
 use task01::task01;
 use task02::task02;
@@ -23,7 +26,9 @@ struct AocResult<P1: Display, P2: Display> {
     b: P2,
 }
 
-fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(f: F) -> anyhow::Result<()> {
+fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
+    f: F,
+) -> anyhow::Result<()> {
     const ITERS: usize = 1000;
 
     let start = Instant::now();
@@ -37,7 +42,9 @@ fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>
     Ok(())
 }
 
-fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(f: F) -> anyhow::Result<()> {
+fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
+    f: F,
+) -> anyhow::Result<()> {
     let start = Instant::now();
     let AocResult { a, b } = f()?;
     let elapsed = start.elapsed();

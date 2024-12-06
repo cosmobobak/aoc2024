@@ -44,5 +44,8 @@ pub fn task01() -> Result<AocResult<u32, i32>> {
         .map(|&v| v * keys.iter().position(|&k| k == v).map_or(0, |i| vals[i]))
         .sum::<i32>();
 
-    Ok(AocResult { a: diff_sum, b: count_sum })
+    Ok(AocResult {
+        a: diff_sum,
+        b: count_sum,
+    })
 }

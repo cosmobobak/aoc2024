@@ -64,7 +64,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
     });
 
     let mut successful_blockers = 0;
-    // only makes sense to place a blocker on somewhere the guard actually walks 
+    // only makes sense to place a blocker on somewhere the guard actually walks
     for &(row, col) in &seen {
         row_map.push(row, col);
         col_map.push(col, row);
