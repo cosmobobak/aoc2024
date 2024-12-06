@@ -1,5 +1,7 @@
 use anyhow::Result;
 
+use crate::AocResult;
+
 fn raycast<const X_INC: isize, const Y_INC: isize>(
     x: isize,
     y: isize,
@@ -16,31 +18,28 @@ fn seq(is: impl Iterator<Item = (isize, isize)>, grid: &[&[u8]]) -> Option<[u8; 
     Some(v)
 }
 
-pub fn task04() -> Result<()> {
-    let start = std::time::Instant::now();
-    let task = include_bytes!("../tasks/task04.txt");
+pub fn task04() -> Result<AocResult<i32, i32>> {
+    let task = std::hint::black_box(include_bytes!("../tasks/task04.txt"));
 
     let grid = task.split(|b| *b == b'\n').collect::<Vec<_>>();
 
-    let mut sum = 0;
+    let mut sum1 = 0;
 
     let needle = Some(*b"XMAS");
     for (row, r) in grid.iter().zip(0..) {
         for (_, c) in row.iter().zip(0..) {
-            sum += i32::from(seq(raycast::<1, 0>(r, c), &grid) == needle);
-            sum += i32::from(seq(raycast::<0, 1>(r, c), &grid) == needle);
-            sum += i32::from(seq(raycast::<-1, 0>(r, c), &grid) == needle);
-            sum += i32::from(seq(raycast::<0, -1>(r, c), &grid) == needle);
-            sum += i32::from(seq(raycast::<1, 1>(r, c), &grid) == needle);
-            sum += i32::from(seq(raycast::<1, -1>(r, c), &grid) == needle);
-            sum += i32::from(seq(raycast::<-1, -1>(r, c), &grid) == needle);
-            sum += i32::from(seq(raycast::<-1, 1>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<1, 0>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<0, 1>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<-1, 0>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<0, -1>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<1, 1>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<1, -1>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<-1, -1>(r, c), &grid) == needle);
+            sum1 += i32::from(seq(raycast::<-1, 1>(r, c), &grid) == needle);
         }
     }
 
-    println!("Part 1: {sum}");
-
-    let mut sum = 0;
+    let mut sum2 = 0;
 
     // for each sequence of three rows:
     for row3 in grid.windows(3) {
@@ -54,15 +53,10 @@ pub fn task04() -> Result<()> {
             let diag1 = [a[0], b[1], c[2]];
             let diag2 = [a[2], b[1], c[0]];
             if (diag1 == *b"MAS" || diag1 == *b"SAM") && (diag2 == *b"MAS" || diag2 == *b"SAM") {
-                sum += 1;
+                sum2 += 1;
             }
         }
     }
 
-    println!("Part 2: {sum}");
-
-    let elapsed = start.elapsed();
-    println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
-
-    Ok(())
+    Ok(AocResult { a: sum1, b: sum2 })
 }

@@ -1,14 +1,12 @@
 use anyhow::{Context, Result};
 
-pub fn task06() -> Result<()> {
-    let start = std::time::Instant::now();
-    // let task = include_str!("../tasks/task06.txt");
+use crate::AocResult;
 
-    // println!("Part 1: {}");
-    // println!("Part 2: {}");
+pub fn task06() -> Result<AocResult<usize, i32>> {
+    let task = std::hint::black_box(include_str!("../tasks/task06.txt"));
 
-    let elapsed = start.elapsed();
-    println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
+    let a = task.lines().count();
+    let b = 0;
 
-    Ok(())
+    Ok(AocResult { a, b })
 }

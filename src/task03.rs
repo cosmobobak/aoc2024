@@ -5,6 +5,8 @@ use nom::{
     IResult,
 };
 
+use crate::AocResult;
+
 fn bytes_to_int(bytes: &[u8]) -> i32 {
     bytes
         .iter()
@@ -22,8 +24,7 @@ fn parse_pair(input: &[u8]) -> IResult<&[u8], (i32, i32)> {
     Ok((input, (num1, num2)))
 }
 
-pub fn task03() -> Result<()> {
-    let start = std::time::Instant::now();
+pub fn task03() -> Result<AocResult<i32, i32>> {
     let task = include_bytes!("../tasks/task03.txt");
 
     let mut sum1 = 0;
@@ -50,11 +51,5 @@ pub fn task03() -> Result<()> {
         }
     }
 
-    println!("Part 1: {sum1}");
-    println!("Part 2: {sum2}");
-
-    let elapsed = start.elapsed();
-    println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
-
-    Ok(())
+    Ok(AocResult { a: sum1, b: sum2 })
 }

@@ -2,9 +2,10 @@ use anyhow::{Context, Result};
 
 use arrayvec::ArrayVec;
 
-pub fn task02() -> Result<()> {
-    let start = std::time::Instant::now();
-    let task = include_str!("../tasks/task02.txt");
+use crate::AocResult;
+
+pub fn task02() -> Result<AocResult<i32, i32>> {
+    let task = std::hint::black_box(include_str!("../tasks/task02.txt"));
 
     let (a, b) = task.lines().try_fold((0, 0), |(a, b), line| {
         let nums = line
@@ -47,11 +48,5 @@ pub fn task02() -> Result<()> {
         ))
     })?;
 
-    println!("Part 1: {a}");
-    println!("Part 2: {b}");
-
-    let elapsed = start.elapsed();
-    println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
-
-    Ok(())
+    Ok(AocResult { a, b })
 }

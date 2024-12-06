@@ -1,8 +1,9 @@
 use anyhow::{bail, Result};
 
-pub fn task01() -> Result<()> {
-    let start = std::time::Instant::now();
-    let task = include_str!("../tasks/task01.txt");
+use crate::AocResult;
+
+pub fn task01() -> Result<AocResult<u32, i32>> {
+    let task = std::hint::black_box(include_str!("../tasks/task01.txt"));
 
     let mut ls = Vec::new();
     let mut rs = Vec::new();
@@ -43,11 +44,5 @@ pub fn task01() -> Result<()> {
         .map(|&v| v * keys.iter().position(|&k| k == v).map_or(0, |i| vals[i]))
         .sum::<i32>();
 
-    println!("Part 1: {diff_sum}");
-    println!("Part 2: {count_sum}");
-
-    let elapsed = start.elapsed();
-    println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
-
-    Ok(())
+    Ok(AocResult { a: diff_sum, b: count_sum })
 }
