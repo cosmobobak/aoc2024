@@ -102,6 +102,9 @@ fn exec<const PART_2: bool>(
     let mut dir = Dir::Up;
 
     loop {
+        if PART_2 && !states.insert((dir, guard_pos.0, guard_pos.1)) {
+            return true; // repeat found
+        }
         match dir {
             Up | Down => {
                 let obstacles = col_map.find(&guard_pos.1).unwrap_or(&[]);
@@ -122,9 +125,6 @@ fn exec<const PART_2: bool>(
                 let max = guard_pos.0.max(new_row);
                 for r in min..=max {
                     acc((r, guard_pos.1));
-                }
-                if PART_2 && !states.insert((dir, max, guard_pos.1)) {
-                    return true; // repeat found
                 }
                 guard_pos.0 = new_row;
             }
@@ -147,9 +147,6 @@ fn exec<const PART_2: bool>(
                 let max = guard_pos.1.max(new_col);
                 for c in min..=max {
                     acc((guard_pos.0, c));
-                }
-                if PART_2 && !states.insert((dir, guard_pos.0, max)) {
-                    return true; // repeat found
                 }
                 guard_pos.1 = new_col;
             }
