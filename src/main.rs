@@ -7,6 +7,7 @@ mod task03;
 mod task04;
 mod task05;
 mod task06;
+mod bucket;
 
 use std::{fmt::Display, time::{Duration, Instant}};
 
@@ -44,10 +45,6 @@ fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
 }
 
 fn main() -> anyhow::Result<()> {
-    bench(task01)?;
-    bench(task02)?;
-    bench(task03)?;
-    bench(task04)?;
-    bench(task05)?;
+    exec(task06)?;
     Ok(())
 }
