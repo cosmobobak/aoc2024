@@ -4,7 +4,10 @@ use anyhow::{Context, Result};
 use arrayvec::ArrayVec;
 use fxhash::FxHashSet;
 
-use crate::{bucket::{ArrayBucket, HashBucket}, AocResult};
+use crate::{
+    bucket::{ArrayBucket, HashBucket},
+    AocResult,
+};
 
 const CAP: usize = 32;
 
@@ -36,7 +39,9 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
         line.as_bytes()
             .iter()
             .enumerate()
-            .filter_map(move |(col, val)| (*val == b'#').then_some((u16::try_from(row), u16::try_from(col))))
+            .filter_map(move |(col, val)| {
+                (*val == b'#').then_some((u16::try_from(row), u16::try_from(col)))
+            })
     });
 
     let rows = u16::try_from(task.lines().count())?;
@@ -56,10 +61,9 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
         .lines()
         .enumerate()
         .find_map(|(row, l)| {
-            l.as_bytes()
-                .iter()
-                .enumerate()
-                .find_map(|(col, v)| (*v == b'^').then_some((u16::try_from(row), u16::try_from(col))))
+            l.as_bytes().iter().enumerate().find_map(|(col, v)| {
+                (*v == b'^').then_some((u16::try_from(row), u16::try_from(col)))
+            })
         })
         .context("couldn't find ^!")?;
     let guard_pos = (guard_row?, guard_col?);
@@ -67,9 +71,17 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
     let mut states = FxHashSet::default();
 
     let mut seen = HashSet::new();
-    exec::<false>(guard_pos, &col_map, &row_map, rows, cols, &mut states, |(row, col)| {
-        seen.insert((row, col));
-    });
+    exec::<false>(
+        guard_pos,
+        &col_map,
+        &row_map,
+        rows,
+        cols,
+        &mut states,
+        |(row, col)| {
+            seen.insert((row, col));
+        },
+    );
 
     let mut successful_blockers = 0;
     // only makes sense to place a blocker on somewhere the guard actually walks
@@ -78,7 +90,13 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
         row_map.push(row, col);
         col_map.push(col, row);
         successful_blockers += usize::from(exec::<true>(
-            guard_pos, &col_map, &row_map, rows, cols, &mut states, drop,
+            guard_pos,
+            &col_map,
+            &row_map,
+            rows,
+            cols,
+            &mut states,
+            drop,
         ));
         row_map.remove(row, col);
         col_map.remove(col, row);
@@ -91,7 +109,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
 }
 
 fn exec<const PART_2: bool>(
-    mut guard_pos: (u16, u16),
+    mut guard: (u16, u16),
     col_map: &ArrayBucket<u16, u16, CAP>,
     row_map: &ArrayBucket<u16, u16, CAP>,
     rows: u16,
@@ -102,53 +120,53 @@ fn exec<const PART_2: bool>(
     let mut dir = Dir::Up;
 
     loop {
-        if PART_2 && !states.insert((dir, guard_pos.0, guard_pos.1)) {
+        if PART_2 && !states.insert((dir, guard.0, guard.1)) {
             return true; // repeat found
         }
         match dir {
             Up | Down => {
-                let obstacles = col_map.find(&guard_pos.1).unwrap_or(&[]);
+                let obstacles = col_map.find(&guard.1).unwrap_or(&[]);
                 let new_row = if dir == Up {
-                    let Some(first_blocker) = obstacles.iter().copied().filter(|v| *v < guard_pos.0).max()
+                    let Some(block) = obstacles.iter().copied().filter(|v| *v < guard.0).max()
                     else {
                         break;
                     };
-                    first_blocker + 1
+                    block + 1
                 } else {
-                    let Some(first_blocker) = obstacles.iter().copied().filter(|v| *v > guard_pos.0).min()
+                    let Some(block) = obstacles.iter().copied().filter(|v| *v > guard.0).min()
                     else {
                         break;
                     };
-                    first_blocker - 1
+                    block - 1
                 };
-                let min = guard_pos.0.min(new_row);
-                let max = guard_pos.0.max(new_row);
+                let min = guard.0.min(new_row);
+                let max = guard.0.max(new_row);
                 for r in min..=max {
-                    acc((r, guard_pos.1));
+                    acc((r, guard.1));
                 }
-                guard_pos.0 = new_row;
+                guard.0 = new_row;
             }
             Left | Right => {
-                let obstacles = row_map.find(&guard_pos.0).unwrap_or(&[]);
+                let obstacles = row_map.find(&guard.0).unwrap_or(&[]);
                 let new_col = if dir == Left {
-                    let Some(first_blocker) = obstacles.iter().copied().filter(|v| *v < guard_pos.1).max()
+                    let Some(block) = obstacles.iter().copied().filter(|v| *v < guard.1).max()
                     else {
                         break;
                     };
-                    first_blocker + 1
+                    block + 1
                 } else {
-                    let Some(first_blocker) = obstacles.iter().copied().filter(|v| *v > guard_pos.1).min()
+                    let Some(block) = obstacles.iter().copied().filter(|v| *v > guard.1).min()
                     else {
                         break;
                     };
-                    first_blocker - 1
+                    block - 1
                 };
-                let min = guard_pos.1.min(new_col);
-                let max = guard_pos.1.max(new_col);
+                let min = guard.1.min(new_col);
+                let max = guard.1.max(new_col);
                 for c in min..=max {
-                    acc((guard_pos.0, c));
+                    acc((guard.0, c));
                 }
-                guard_pos.1 = new_col;
+                guard.1 = new_col;
             }
         };
         dir = dir.next();
@@ -157,23 +175,23 @@ fn exec<const PART_2: bool>(
     // exit cleanup, maybe improvable
     match dir {
         Up => {
-            for row in 0..guard_pos.0 {
-                acc((row, guard_pos.1));
+            for row in 0..guard.0 {
+                acc((row, guard.1));
             }
         }
         Down => {
-            for row in guard_pos.0..rows {
-                acc((row, guard_pos.1));
+            for row in guard.0..rows {
+                acc((row, guard.1));
             }
         }
         Left => {
-            for col in 0..guard_pos.1 {
-                acc((guard_pos.0, col));
+            for col in 0..guard.1 {
+                acc((guard.0, col));
             }
         }
         Right => {
-            for col in guard_pos.1..cols {
-                acc((guard_pos.0, col));
+            for col in guard.1..cols {
+                acc((guard.0, col));
             }
         }
     }
