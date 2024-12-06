@@ -64,6 +64,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
     });
 
     let mut successful_blockers = 0;
+    // only makes sense to place a blocker on somewhere the guard actually walks 
     for &(row, col) in &seen {
         row_map.push(row, col);
         col_map.push(col, row);
@@ -110,7 +111,6 @@ fn exec<const PART_2: bool>(
                     };
                     first_blocker - 1
                 };
-                // total += guard_pos.0.abs_diff(new_row);
                 let min = guard_pos.0.min(new_row);
                 let max = guard_pos.0.max(new_row);
                 for r in min..=max {
@@ -139,7 +139,6 @@ fn exec<const PART_2: bool>(
                     };
                     first_blocker - 1
                 };
-                // total += guard_pos.1.abs_diff(new_col);
                 let min = guard_pos.1.min(new_col);
                 let max = guard_pos.1.max(new_col);
                 for c in min..=max {
