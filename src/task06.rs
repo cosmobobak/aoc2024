@@ -12,7 +12,7 @@ use crate::{
 
 const CAP: usize = 32;
 
-#[derive(PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 enum Dir {
     Up,
     Right,
@@ -86,6 +86,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
             seen.insert((row, col));
         },
     );
+    seen.remove(&guard_pos);
 
     let mut successful_blockers = 0;
     // only makes sense to place a blocker on somewhere the guard actually walks
@@ -106,7 +107,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
         col_map.remove(col, row);
     }
 
-    let a = seen.len();
+    let a = seen.len() + 1;
     let b = successful_blockers;
 
     Ok(AocResult { a, b })
@@ -134,19 +135,23 @@ fn exec<const PART_2: bool>(
         states.set(idx, true);
         match dir {
             Up | Down => {
-                let obstacles = col_map.find(&guard.1).unwrap_or(&[]);
+                let Some(blockers) = col_map.find(&guard.1) else {
+                    break;
+                };
+                let blocker_idx = blockers
+                    .iter()
+                    .position(|&v| v > guard.0)
+                    .unwrap_or(blockers.len());
                 let new_row = if dir == Up {
-                    let Some(block) = obstacles.iter().rev().copied().find(|v| *v < guard.0)
-                    else {
+                    if blocker_idx == 0 {
                         break;
-                    };
-                    block + 1
+                    }
+                    blockers[blocker_idx - 1] + 1
                 } else {
-                    let Some(block) = obstacles.iter().copied().find(|v| *v > guard.0)
-                    else {
+                    if blocker_idx == blockers.len() {
                         break;
-                    };
-                    block - 1
+                    }
+                    blockers[blocker_idx] - 1
                 };
                 let min = guard.0.min(new_row);
                 let max = guard.0.max(new_row);
@@ -156,19 +161,23 @@ fn exec<const PART_2: bool>(
                 guard.0 = new_row;
             }
             Left | Right => {
-                let obstacles = row_map.find(&guard.0).unwrap_or(&[]);
+                let Some(blockers) = row_map.find(&guard.0) else {
+                    break;
+                };
+                let blocker_idx = blockers
+                    .iter()
+                    .position(|&v| v > guard.1)
+                    .unwrap_or(blockers.len());
                 let new_col = if dir == Left {
-                    let Some(block) = obstacles.iter().rev().copied().find(|v| *v < guard.1)
-                    else {
+                    if blocker_idx == 0 {
                         break;
-                    };
-                    block + 1
+                    }
+                    blockers[blocker_idx - 1] + 1
                 } else {
-                    let Some(block) = obstacles.iter().copied().find(|v| *v > guard.1)
-                    else {
+                    if blocker_idx == blockers.len() {
                         break;
-                    };
-                    block - 1
+                    }
+                    blockers[blocker_idx] - 1
                 };
                 let min = guard.1.min(new_col);
                 let max = guard.1.max(new_col);

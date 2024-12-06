@@ -55,6 +55,6 @@ fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
 }
 
 fn main() -> anyhow::Result<()> {
-    bench(task06)?;
+    exec(task06)?;
     Ok(())
 }
