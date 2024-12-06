@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-#![allow(dead_code, unused_imports, clippy::unnecessary_wraps)]
+#![allow(dead_code, unused_imports, clippy::unnecessary_wraps, clippy::range_plus_one)]
 
 mod bucket;
 mod task01;

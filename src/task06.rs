@@ -146,18 +146,21 @@ fn exec<const PART_2: bool>(
                     if blocker_idx == 0 {
                         break;
                     }
-                    blockers[blocker_idx - 1] + 1
+                    let new = blockers[blocker_idx - 1] + 1;
+                    for r in new..guard.0 + 1 {
+                        acc((r, guard.1));
+                    }
+                    new
                 } else {
                     if blocker_idx == blockers.len() {
                         break;
                     }
-                    blockers[blocker_idx] - 1
+                    let new = blockers[blocker_idx] - 1;
+                    for r in guard.0..new + 1 {
+                        acc((r, guard.1));
+                    }
+                    new
                 };
-                let min = guard.0.min(new_row);
-                let max = guard.0.max(new_row);
-                for r in min..=max {
-                    acc((r, guard.1));
-                }
                 guard.0 = new_row;
             }
             Left | Right => {
@@ -172,18 +175,21 @@ fn exec<const PART_2: bool>(
                     if blocker_idx == 0 {
                         break;
                     }
-                    blockers[blocker_idx - 1] + 1
+                    let new = blockers[blocker_idx - 1] + 1;
+                    for c in new..guard.1 + 1 {
+                        acc((guard.0, c));
+                    }
+                    new
                 } else {
                     if blocker_idx == blockers.len() {
                         break;
                     }
-                    blockers[blocker_idx] - 1
+                    let new = blockers[blocker_idx] - 1;
+                    for c in guard.1..new + 1 {
+                        acc((guard.0, c));
+                    }
+                    new
                 };
-                let min = guard.1.min(new_col);
-                let max = guard.1.max(new_col);
-                for c in min..=max {
-                    acc((guard.0, c));
-                }
                 guard.1 = new_col;
             }
         };
