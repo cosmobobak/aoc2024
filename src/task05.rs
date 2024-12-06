@@ -10,7 +10,7 @@ pub fn task05() -> Result<AocResult<i32, i32>> {
 
     let (rules, seqs) = task.split_once("\n\n").context("Failed to split")?;
 
-    let mut forward_rules = ArrayBucket::<_, _, 32>::new();
+    let mut forward_rules = ArrayBucket::<_, _, 32, false>::new();
 
     for l in rules.lines() {
         let (a, b) = l.split_once('|').context("Failed to split")?;

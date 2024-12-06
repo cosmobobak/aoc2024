@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use anyhow::{Context, Result};
 use arrayvec::ArrayVec;
+use bitvec::{ptr::BitRef, slice::BitSlice, view::BitView};
 use fxhash::FxHashSet;
 
 use crate::{
@@ -32,6 +33,9 @@ impl Dir {
     }
 }
 
+// so i can play with bit widths
+type Uint = u8;
+
 pub fn task06() -> Result<AocResult<usize, usize>> {
     let task = std::hint::black_box(include_str!("../tasks/task06.txt"));
 
@@ -40,15 +44,15 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
             .iter()
             .enumerate()
             .filter_map(move |(col, val)| {
-                (*val == b'#').then_some((u16::try_from(row), u16::try_from(col)))
+                (*val == b'#').then_some((Uint::try_from(row), Uint::try_from(col)))
             })
     });
 
-    let rows = u16::try_from(task.lines().count())?;
-    let cols = u16::try_from(task.lines().next().unwrap().len())?;
+    let rows = Uint::try_from(task.lines().count())?;
+    let cols = Uint::try_from(task.lines().next().unwrap().len())?;
 
-    let mut row_map = ArrayBucket::<_, _, CAP>::new();
-    let mut col_map = ArrayBucket::<_, _, CAP>::new();
+    let mut row_map = HashBucket::<_, _, CAP, true>::new();
+    let mut col_map = HashBucket::<_, _, CAP, true>::new();
 
     for (row, col) in obstacles {
         let row = row?;
@@ -62,13 +66,13 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
         .enumerate()
         .find_map(|(row, l)| {
             l.as_bytes().iter().enumerate().find_map(|(col, v)| {
-                (*v == b'^').then_some((u16::try_from(row), u16::try_from(col)))
+                (*v == b'^').then_some((Uint::try_from(row), Uint::try_from(col)))
             })
         })
         .context("couldn't find ^!")?;
     let guard_pos = (guard_row?, guard_col?);
 
-    let mut states = FxHashSet::default();
+    let mut states = vec![0u8; rows as usize * cols as usize * 4 / 8];
 
     let mut seen = HashSet::new();
     exec::<false>(
@@ -77,7 +81,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
         &row_map,
         rows,
         cols,
-        &mut states,
+        states.view_bits_mut(),
         |(row, col)| {
             seen.insert((row, col));
         },
@@ -86,7 +90,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
     let mut successful_blockers = 0;
     // only makes sense to place a blocker on somewhere the guard actually walks
     for &(row, col) in &seen {
-        states.clear();
+        states.fill(0);
         row_map.push(row, col);
         col_map.push(col, row);
         successful_blockers += usize::from(exec::<true>(
@@ -95,7 +99,7 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
             &row_map,
             rows,
             cols,
-            &mut states,
+            states.view_bits_mut(),
             drop,
         ));
         row_map.remove(row, col);
@@ -109,31 +113,36 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
 }
 
 fn exec<const PART_2: bool>(
-    mut guard: (u16, u16),
-    col_map: &ArrayBucket<u16, u16, CAP>,
-    row_map: &ArrayBucket<u16, u16, CAP>,
-    rows: u16,
-    cols: u16,
-    states: &mut FxHashSet<(Dir, u16, u16)>,
-    mut acc: impl FnMut((u16, u16)),
+    mut guard: (Uint, Uint),
+    col_map: &HashBucket<Uint, Uint, CAP, true>,
+    row_map: &HashBucket<Uint, Uint, CAP, true>,
+    rows: Uint,
+    cols: Uint,
+    states: &mut BitSlice<u8>,
+    mut acc: impl FnMut((Uint, Uint)),
 ) -> bool {
     let mut dir = Dir::Up;
 
     loop {
-        if PART_2 && !states.insert((dir, guard.0, guard.1)) {
+        let idx1 = usize::from(guard.0);
+        let idx2 = usize::from(guard.1);
+        let idx3 = dir as usize;
+        let idx = idx1 + idx2 * usize::from(rows) + idx3 * usize::from(rows) * usize::from(cols);
+        if PART_2 && states[idx] {
             return true; // repeat found
         }
+        states.set(idx, true);
         match dir {
             Up | Down => {
                 let obstacles = col_map.find(&guard.1).unwrap_or(&[]);
                 let new_row = if dir == Up {
-                    let Some(block) = obstacles.iter().copied().filter(|v| *v < guard.0).max()
+                    let Some(block) = obstacles.iter().rev().copied().find(|v| *v < guard.0)
                     else {
                         break;
                     };
                     block + 1
                 } else {
-                    let Some(block) = obstacles.iter().copied().filter(|v| *v > guard.0).min()
+                    let Some(block) = obstacles.iter().copied().find(|v| *v > guard.0)
                     else {
                         break;
                     };
@@ -149,13 +158,13 @@ fn exec<const PART_2: bool>(
             Left | Right => {
                 let obstacles = row_map.find(&guard.0).unwrap_or(&[]);
                 let new_col = if dir == Left {
-                    let Some(block) = obstacles.iter().copied().filter(|v| *v < guard.1).max()
+                    let Some(block) = obstacles.iter().rev().copied().find(|v| *v < guard.1)
                     else {
                         break;
                     };
                     block + 1
                 } else {
-                    let Some(block) = obstacles.iter().copied().filter(|v| *v > guard.1).min()
+                    let Some(block) = obstacles.iter().copied().find(|v| *v > guard.1)
                     else {
                         break;
                     };

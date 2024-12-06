@@ -1,3 +1,5 @@
+#![allow(clippy::module_name_repetitions)]
+
 use std::{
     collections::{hash_map::Entry, HashMap},
     hash::Hash,
@@ -7,12 +9,14 @@ use std::{
 use arrayvec::ArrayVec;
 use fxhash::FxHashMap;
 
-pub struct ArrayBucket<K, V, const CAP: usize> {
+pub struct ArrayBucket<K, V, const CAP: usize, const SORT: bool> {
     keys: Vec<K>,
     vals: Vec<ArrayVec<V, CAP>>,
 }
 
-impl<K: Eq + Copy, V: Eq + Copy, const CAP: usize> ArrayBucket<K, V, CAP> {
+impl<K: Eq + Copy, V: Eq + Copy + Ord, const CAP: usize, const SORT: bool>
+    ArrayBucket<K, V, CAP, SORT>
+{
     pub const fn new() -> Self {
         Self {
             keys: Vec::new(),
@@ -22,7 +26,12 @@ impl<K: Eq + Copy, V: Eq + Copy, const CAP: usize> ArrayBucket<K, V, CAP> {
 
     pub fn push(&mut self, k: K, v: V) {
         if let Some(idx) = self.keys.iter().position(|&x| x == k) {
-            self.vals[idx].push(v);
+            if SORT {
+                let insert_point = self.vals[idx].partition_point(|&val| val < v);
+                self.vals[idx].insert(insert_point, v);
+            } else {
+                self.vals[idx].push(v);
+            }
         } else {
             self.keys.push(k);
             self.vals.push(ArrayVec::new());
@@ -33,7 +42,11 @@ impl<K: Eq + Copy, V: Eq + Copy, const CAP: usize> ArrayBucket<K, V, CAP> {
     pub fn remove(&mut self, k: K, v: V) {
         if let Some(idx) = self.keys.iter().position(|&x| x == k) {
             if let Some(sub_idx) = self.vals[idx].iter().position(|&x| x == v) {
-                self.vals[idx].swap_remove(sub_idx);
+                if SORT {
+                    self.vals[idx].remove(sub_idx);
+                } else {
+                    self.vals[idx].swap_remove(sub_idx);
+                }
             }
         }
     }
@@ -50,11 +63,13 @@ impl<K: Eq + Copy, V: Eq + Copy, const CAP: usize> ArrayBucket<K, V, CAP> {
     }
 }
 
-pub struct HashBucket<K, V, const CAP: usize> {
+pub struct HashBucket<K, V, const CAP: usize, const SORT: bool> {
     map: FxHashMap<K, ArrayVec<V, CAP>>,
 }
 
-impl<K: Eq + Copy + Hash, V: Eq + Copy, const CAP: usize> HashBucket<K, V, CAP> {
+impl<K: Eq + Copy + Hash, V: Eq + Copy + Ord, const CAP: usize, const SORT: bool>
+    HashBucket<K, V, CAP, SORT>
+{
     pub fn new() -> Self {
         Self {
             map: FxHashMap::default(),
@@ -64,7 +79,13 @@ impl<K: Eq + Copy + Hash, V: Eq + Copy, const CAP: usize> HashBucket<K, V, CAP> 
     pub fn push(&mut self, k: K, v: V) {
         match self.map.entry(k) {
             Entry::Occupied(mut occupied_entry) => {
-                occupied_entry.get_mut().push(v);
+                let vec = occupied_entry.get_mut();
+                if SORT {
+                    let insert_point = vec.partition_point(|&val| val < v);
+                    vec.insert(insert_point, v);
+                } else {
+                    vec.push(v);
+                }
             }
             Entry::Vacant(vacant_entry) => vacant_entry.insert(ArrayVec::new()).push(v),
         }
@@ -74,7 +95,11 @@ impl<K: Eq + Copy + Hash, V: Eq + Copy, const CAP: usize> HashBucket<K, V, CAP> 
         if let Entry::Occupied(mut occupied_entry) = self.map.entry(k) {
             let vec = occupied_entry.get_mut();
             if let Some(sub_idx) = vec.iter().position(|&x| x == v) {
-                vec.swap_remove(sub_idx);
+                if SORT {
+                    vec.remove(sub_idx);
+                } else {
+                    vec.swap_remove(sub_idx);
+                }
             }
         }
     }
