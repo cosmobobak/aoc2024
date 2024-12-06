@@ -7,7 +7,7 @@ pub struct Bucket<K, V, const CAP: usize> {
     vals: Vec<ArrayVec<V, CAP>>,
 }
 
-impl<K: Eq + Copy, V, const CAP: usize> Bucket<K, V, CAP> {
+impl<K: Eq + Copy, V: Eq + Copy, const CAP: usize> Bucket<K, V, CAP> {
     pub const fn new() -> Self {
         Self {
             keys: Vec::new(),
@@ -22,6 +22,14 @@ impl<K: Eq + Copy, V, const CAP: usize> Bucket<K, V, CAP> {
             self.keys.push(k);
             self.vals.push(ArrayVec::new());
             self.vals.last_mut().unwrap().push(v);
+        }
+    }
+
+    pub fn remove(&mut self, k: K, v: V) {
+        if let Some(idx) = self.keys.iter().position(|&x| x == k) {
+            if let Some(sub_idx) = self.vals[idx].iter().position(|&x| x == v) {
+                self.vals[idx].swap_remove(sub_idx);
+            }
         }
     }
 

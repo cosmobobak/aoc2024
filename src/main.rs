@@ -38,9 +38,12 @@ fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>
 }
 
 fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(f: F) -> anyhow::Result<()> {
+    let start = Instant::now();
     let AocResult { a, b } = f()?;
+    let elapsed = start.elapsed();
     println!("Part 1: {a}");
     println!("Part 2: {b}");
+    println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
     Ok(())
 }
 
