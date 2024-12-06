@@ -3,14 +3,14 @@ use std::cmp::Ordering;
 use anyhow::{Context, Result};
 use arrayvec::ArrayVec;
 
-use crate::{bucket::Bucket, AocResult};
+use crate::{bucket::ArrayBucket, AocResult};
 
 pub fn task05() -> Result<AocResult<i32, i32>> {
     let task = include_str!("../tasks/task05.txt");
 
     let (rules, seqs) = task.split_once("\n\n").context("Failed to split")?;
 
-    let mut forward_rules = Bucket::<_, _, 32>::new();
+    let mut forward_rules = ArrayBucket::<_, _, 32>::new();
 
     for l in rules.lines() {
         let (a, b) = l.split_once('|').context("Failed to split")?;

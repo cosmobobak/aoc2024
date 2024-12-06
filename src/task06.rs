@@ -2,8 +2,11 @@ use std::collections::HashSet;
 
 use anyhow::{Context, Result};
 use arrayvec::ArrayVec;
+use fxhash::FxHashSet;
 
-use crate::{bucket::Bucket, AocResult};
+use crate::{bucket::{ArrayBucket, HashBucket}, AocResult};
+
+const CAP: usize = 32;
 
 #[derive(PartialEq, Eq, Clone, Copy, Hash)]
 enum Dir {
@@ -39,8 +42,8 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
     let rows = task.lines().count();
     let cols = task.lines().next().unwrap().len();
 
-    let mut row_map = Bucket::<_, _, 32>::new();
-    let mut col_map = Bucket::<_, _, 32>::new();
+    let mut row_map = ArrayBucket::<_, _, CAP>::new();
+    let mut col_map = ArrayBucket::<_, _, CAP>::new();
 
     for (row, col) in obstacles {
         row_map.push(row, col);
@@ -58,18 +61,21 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
         })
         .context("couldn't find ^!")?;
 
+    let mut states = FxHashSet::default();
+
     let mut seen = HashSet::new();
-    exec::<false>(guard_pos, &col_map, &row_map, rows, cols, |(row, col)| {
+    exec::<false>(guard_pos, &col_map, &row_map, rows, cols, &mut states, |(row, col)| {
         seen.insert((row, col));
     });
 
     let mut successful_blockers = 0;
     // only makes sense to place a blocker on somewhere the guard actually walks
     for &(row, col) in &seen {
+        states.clear();
         row_map.push(row, col);
         col_map.push(col, row);
         successful_blockers += usize::from(exec::<true>(
-            guard_pos, &col_map, &row_map, rows, cols, drop,
+            guard_pos, &col_map, &row_map, rows, cols, &mut states, drop,
         ));
         row_map.remove(row, col);
         col_map.remove(col, row);
@@ -83,14 +89,14 @@ pub fn task06() -> Result<AocResult<usize, usize>> {
 
 fn exec<const PART_2: bool>(
     mut guard_pos: (usize, usize),
-    col_map: &Bucket<usize, usize, 32>,
-    row_map: &Bucket<usize, usize, 32>,
+    col_map: &ArrayBucket<usize, usize, CAP>,
+    row_map: &ArrayBucket<usize, usize, CAP>,
     rows: usize,
     cols: usize,
+    states: &mut FxHashSet<(Dir, usize, usize)>,
     mut acc: impl FnMut((usize, usize)),
 ) -> bool {
     let mut dir = Dir::Up;
-    let mut states = HashSet::new();
 
     loop {
         match dir {
