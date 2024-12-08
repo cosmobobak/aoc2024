@@ -45,7 +45,7 @@ fn visit_all_along_line<const PART_1: bool>(
     mut b: (i32, i32),
     max_x: i32,
     max_y: i32,
-    visitor: &mut impl FnMut((i32, i32)),
+    mut visitor: impl FnMut((i32, i32)),
 ) {
     let a_to_b = (b.0 - a.0, b.1 - a.1);
     // downwards loop:
@@ -96,10 +96,10 @@ pub fn task08() -> Result<AocResult<usize, usize>> {
     for (_, towers) in nodes.iter() {
         for a in 0..towers.len() {
             for b in a + 1..towers.len() {
-                visit_all_along_line::<true>(towers[a], towers[b], rows, cols, &mut |point| {
+                visit_all_along_line::<true>(towers[a], towers[b], rows, cols, |point| {
                     antinodes1.insert(point);
                 });
-                visit_all_along_line::<false>(towers[a], towers[b], rows, cols, &mut |point| {
+                visit_all_along_line::<false>(towers[a], towers[b], rows, cols, |point| {
                     antinodes2.insert(point);
                 });
             }
