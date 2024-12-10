@@ -1,34 +1,35 @@
 use anyhow::{bail, Result};
 use arrayvec::ArrayVec;
-use fxhash::{FxHashMap, FxHashSet};
+use bitvec::{slice::BitSlice, view::AsMutBits};
 
 use crate::AocResult;
 
 fn score(
     current: u8,
     pos: (usize, usize),
-    (rows, cols): (usize, usize),
     grid: &[ArrayVec<u8, 64>],
-    seen: &mut FxHashSet<(usize, usize)>,
+    seen: &mut BitSlice<u8>,
 ) -> (i32, i32) {
+    let rows = grid.len();
     if current == b'9' {
-        if !seen.insert(pos) {
+        if seen[pos.0 + pos.1 * rows]{
             return (0, 1);
         }
+        seen.set(pos.0 + pos.1 * rows, true);
         return (1, 1);
     }
-    let locs = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-        .into_iter()
-        .filter_map(|offset| {
-            let x = pos.0.wrapping_add_signed(offset.0);
-            let y = pos.1.wrapping_add_signed(offset.1);
-            ((0..rows).contains(&x) && (0..cols).contains(&y)).then_some((x, y))
-        });
+
+    let cols = grid[0].len();
     let mut acc = (0, 0);
-    for loc in locs {
-        let val = grid[loc.0][loc.1];
+    for offset in [(1, 0), (0, 1), (-1, 0), (0, -1)] {
+        let x = pos.0.wrapping_add_signed(offset.0);
+        let y = pos.1.wrapping_add_signed(offset.1);
+        if x >= rows || y >= cols {
+            continue;
+        }
+        let val = grid[x][y];
         if val == current + 1 {
-            let (p1, p2) = score(val, loc, (rows, cols), grid, seen);
+            let (p1, p2) = score(val, (x, y), grid, seen);
             acc.0 += p1;
             acc.1 += p2;
         }
@@ -46,13 +47,13 @@ pub fn task10() -> Result<AocResult<i32, i32>> {
 
     let rows = grid.len();
     let cols = grid[0].len();
-
     let mut acc = (0, 0);
+    let mut seen = vec![0u8; rows * cols / 8 + 1];
     for row in 0..rows {
         for col in 0..cols {
             if grid[row][col] == b'0' {
-                let mut seen = FxHashSet::default();
-                let (p1, p2) = score(b'0', (row, col), (rows, cols), &grid, &mut seen);
+                seen.fill(0);
+                let (p1, p2) = score(b'0', (row, col), &grid, seen.as_mut_bits());
                 acc.0 += p1;
                 acc.1 += p2;
             }
