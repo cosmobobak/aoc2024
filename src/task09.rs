@@ -22,7 +22,11 @@ struct Block {
 fn part_2(task: &str) -> Result<i64, anyhow::Error> {
     const FREE: i64 = i64::MIN;
 
-    let mut blocks = vec![Block { val: FREE, start: 0, len: 0 }];
+    let mut blocks = vec![Block {
+        val: FREE,
+        start: 0,
+        len: 0,
+    }];
     let mut free = false;
     let mut start = 0;
     let mut val = 0;
@@ -46,7 +50,11 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
         free = !free;
     }
     // padding
-    blocks.push(Block { val: FREE, start: 0, len: 0 });
+    blocks.push(Block {
+        val: FREE,
+        start: 0,
+        len: 0,
+    });
 
     let mut try_move = blocks.len() - 1;
     loop {
@@ -99,11 +107,14 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
             blocks[insert].val = val;
             // 4. either inject remaining freespace or overwrite exactly:
             if blocks[insert].len != len {
-                blocks.insert(insert + 1, Block {
-                    val: FREE,
-                    start: blocks[insert].start + len,
-                    len: blocks[insert].len - len,
-                });
+                blocks.insert(
+                    insert + 1,
+                    Block {
+                        val: FREE,
+                        start: blocks[insert].start + len,
+                        len: blocks[insert].len - len,
+                    },
+                );
                 try_move += 1;
             }
             // 5. set the first section of the freespace

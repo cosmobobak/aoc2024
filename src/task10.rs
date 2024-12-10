@@ -12,7 +12,7 @@ fn score(
 ) -> (i32, i32) {
     let rows = grid.len();
     if current == b'9' {
-        if seen[pos.0 + pos.1 * rows]{
+        if seen[pos.0 + pos.1 * rows] {
             return (0, 1);
         }
         seen.set(pos.0 + pos.1 * rows, true);
