@@ -11,6 +11,7 @@ pub fn task09() -> Result<AocResult<i64, i64>> {
     Ok(AocResult { a, b })
 }
 
+#[derive(Clone, Copy)]
 struct Block {
     val: i16,
     start: u16,
@@ -62,64 +63,64 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
         if try_move == 0 {
             break;
         }
+        let src = blocks[try_move];
         // println!("try_move = {try_move}");
-        if blocks[try_move].val == FREE {
+        if src.val == FREE {
             // empty block
             try_move -= 1;
             continue;
         }
         let mut insert = 0;
         while insert < try_move {
-            if blocks[insert].val != FREE {
+            let tgt = blocks[insert];
+            if tgt.val != FREE {
                 insert += 1;
                 continue;
             }
-            if blocks[insert].len < blocks[try_move].len {
+            if tgt.len < src.len {
                 insert += 1;
                 continue;
             }
             // move the block in:
-            // 0. save the value
-            let val = blocks[try_move].val;
-            let len = blocks[try_move].len;
             // 1. set the source as free-space (or dead space)
             blocks[try_move].val = FREE;
             // 2. unify any free space
-            match (blocks[try_move - 1].val, blocks[try_move + 1].val) {
+            let (l, r) = (blocks[try_move - 1], blocks[try_move + 1]);
+            match (l.val, r.val) {
                 (FREE, FREE) => {
                     // if both free, nuke this one and the right-hand one, expanding the lhs into them.
-                    blocks[try_move - 1].len += blocks[try_move].len + blocks[try_move + 1].len;
+                    blocks[try_move - 1].len += src.len + r.len;
                     blocks.remove(try_move);
                     blocks.remove(try_move);
                     try_move -= 1;
                 }
                 (FREE, _) => {
-                    blocks[try_move - 1].len += blocks[try_move].len;
+                    blocks[try_move - 1].len += src.len;
                     blocks.remove(try_move);
                     try_move -= 1;
                 }
                 (_, FREE) => {
-                    blocks[try_move].len += blocks[try_move + 1].len;
+                    blocks[try_move].len += r.len;
                     blocks.remove(try_move + 1);
                 }
                 _ => {}
             }
             // 3. set the type of the freespace as our stuff
-            blocks[insert].val = val;
+            blocks[insert].val = src.val;
             // 4. either inject remaining freespace or overwrite exactly:
-            if blocks[insert].len != len {
+            if tgt.len != src.len {
                 blocks.insert(
                     insert + 1,
                     Block {
                         val: FREE,
-                        start: blocks[insert].start + len,
-                        len: blocks[insert].len - len,
+                        start: tgt.start + src.len,
+                        len: tgt.len - src.len,
                     },
                 );
                 try_move += 1;
             }
             // 5. set the first section of the freespace
-            blocks[insert].len = len;
+            blocks[insert].len = src.len;
 
             break;
         }
