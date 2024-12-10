@@ -12,15 +12,15 @@ pub fn task09() -> Result<AocResult<i64, i64>> {
 }
 
 struct Block {
-    val: i64,
-    start: usize,
-    len: usize,
+    val: i16,
+    start: u16,
+    len: u16,
 }
 
 // this is a horrifically inefficient design.
 #[allow(clippy::cast_possible_wrap, clippy::too_many_lines)]
 fn part_2(task: &str) -> Result<i64, anyhow::Error> {
-    const FREE: i64 = i64::MIN;
+    const FREE: i16 = i16::MIN;
 
     let mut blocks = Vec::with_capacity(task.len() * 3 / 2);
     blocks.push(Block {
@@ -32,7 +32,7 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
     let mut start = 0;
     let mut val = 0;
     for &byte in task.as_bytes() {
-        let len = (byte - b'0') as usize;
+        let len = u16::from(byte - b'0');
         if len == 0 {
             free = !free;
             continue;
@@ -133,10 +133,10 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
     let mut acc = 0;
     let mut count = 0;
     for block in &blocks {
-        let val = block.len as i64;
+        let val = i64::from(block.len);
         if block.val >= 0 {
-            let lo = count * block.val;
-            let hi = (count + (val - 1)) * block.val;
+            let lo = count * i64::from(block.val);
+            let hi = (count + (val - 1)) * i64::from(block.val);
             acc += (lo + hi) * val / 2;
         }
         count += val;
