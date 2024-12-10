@@ -22,11 +22,12 @@ struct Block {
 fn part_2(task: &str) -> Result<i64, anyhow::Error> {
     const FREE: i64 = i64::MIN;
 
-    let mut blocks = vec![Block {
+    let mut blocks = Vec::with_capacity(task.len() * 3 / 2);
+    blocks.push(Block {
         val: FREE,
         start: 0,
         len: 0,
-    }];
+    });
     let mut free = false;
     let mut start = 0;
     let mut val = 0;
