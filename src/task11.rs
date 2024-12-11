@@ -8,34 +8,30 @@ fn split_count(
     value: u64,
     cache: &mut FxHashMap<(usize, u64), u64>,
 ) -> u64 {
+    if iters_remaining == 0 {
+        return 1;
+    }
+
     let key = (iters_remaining, value);
 
     if let Some(res) = cache.get(&key) {
         return *res;
     }
 
-    if iters_remaining == 0 {
-        return 1;
-    }
-
-    if value == 0 {
-        let res = split_count(iters_remaining - 1, 1, cache);
-        cache.insert(key, res);
-        return res;
-    }
-
-    let digits = value.ilog10() + 1;
-    if digits % 2 == 0 {
+    let digits = if value == 0 { 1 } else { value.ilog10() + 1 };
+    let res = if value == 0 {
+        split_count(iters_remaining - 1, 1, cache)
+    } else if digits % 2 == 0 {
         let split = 10u64.pow(digits / 2);
         let hi = split_count(iters_remaining - 1, value / split, cache);
         let lo = split_count(iters_remaining - 1, value % split, cache);
-        let res = lo + hi;
-        cache.insert(key, res);
-        return res;
-    }
+        lo + hi
+    } else {
+        split_count(iters_remaining - 1, value * 2024, cache)
+    };
 
-    let res = split_count(iters_remaining - 1, value * 2024, cache);
     cache.insert(key, res);
+
     res
 }
 
