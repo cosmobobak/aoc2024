@@ -18,6 +18,7 @@ mod task08;
 mod task09;
 mod task10;
 mod task11;
+mod task12;
 
 use std::{
     fmt::Display,
@@ -35,6 +36,7 @@ use task08::task08;
 use task09::task09;
 use task10::task10;
 use task11::task11;
+use task12::task12;
 
 struct AocResult<P1: Display, P2: Display> {
     a: P1,
@@ -44,7 +46,7 @@ struct AocResult<P1: Display, P2: Display> {
 fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
     f: F,
 ) -> anyhow::Result<()> {
-    const ITERS: usize = 50;
+    const ITERS: usize = 200;
 
     let start = Instant::now();
     for _ in 0..ITERS {
@@ -70,6 +72,6 @@ fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
 }
 
 fn main() -> anyhow::Result<()> {
-    exec(task11)?;
+    exec(task12)?;
     Ok(())
 }
