@@ -3,7 +3,11 @@ use fxhash::FxHashMap;
 
 use crate::AocResult;
 
-fn split_count(iters_remaining: usize, value: u64, cache: &mut FxHashMap<(usize, u64), u64>) -> u64 {
+fn split_count(
+    iters_remaining: usize,
+    value: u64,
+    cache: &mut FxHashMap<(usize, u64), u64>,
+) -> u64 {
     if let Some(res) = cache.get(&(iters_remaining, value)) {
         return *res;
     }
@@ -43,8 +47,5 @@ pub fn task11() -> Result<AocResult<u64, i32>> {
         a += split_count(75, num, &mut cache);
     }
 
-    Ok(AocResult {
-        a,
-        b: 0,
-    })
+    Ok(AocResult { a, b: 0 })
 }
