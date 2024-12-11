@@ -17,6 +17,7 @@ mod task07;
 mod task08;
 mod task09;
 mod task10;
+mod task11;
 
 use std::{
     fmt::Display,
@@ -33,6 +34,7 @@ use task07::task07;
 use task08::task08;
 use task09::task09;
 use task10::task10;
+use task11::task11;
 
 struct AocResult<P1: Display, P2: Display> {
     a: P1,
