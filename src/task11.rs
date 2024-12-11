@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use fxhash::FxHashMap;
+use fxhash::{FxBuildHasher, FxHashMap};
 
 use crate::AocResult;
 
@@ -8,7 +8,9 @@ fn split_count(
     value: u64,
     cache: &mut FxHashMap<(usize, u64), u64>,
 ) -> u64 {
-    if let Some(res) = cache.get(&(iters_remaining, value)) {
+    let key = (iters_remaining, value);
+
+    if let Some(res) = cache.get(&key) {
         return *res;
     }
 
@@ -18,7 +20,7 @@ fn split_count(
 
     if value == 0 {
         let res = split_count(iters_remaining - 1, 1, cache);
-        cache.insert((iters_remaining, value), res);
+        cache.insert(key, res);
         return res;
     }
 
@@ -28,24 +30,26 @@ fn split_count(
         let hi = split_count(iters_remaining - 1, value / split, cache);
         let lo = split_count(iters_remaining - 1, value % split, cache);
         let res = lo + hi;
-        cache.insert((iters_remaining, value), res);
+        cache.insert(key, res);
         return res;
     }
 
     let res = split_count(iters_remaining - 1, value * 2024, cache);
-    cache.insert((iters_remaining, value), res);
+    cache.insert(key, res);
     res
 }
 
-pub fn task11() -> Result<AocResult<u64, i32>> {
+pub fn task11() -> Result<AocResult<u64, u64>> {
     let task = std::hint::black_box(include_str!("../tasks/task11.txt"));
 
     let mut a = 0;
-    let mut cache = FxHashMap::default();
+    let mut b = 0;
+    let mut cache = FxHashMap::with_capacity_and_hasher(300_000, FxBuildHasher::default());
     for num in task.split_whitespace() {
         let num = num.parse::<u64>()?;
-        a += split_count(75, num, &mut cache);
+        a += split_count(25, num, &mut cache);
+        b += split_count(75, num, &mut cache);
     }
 
-    Ok(AocResult { a, b: 0 })
+    Ok(AocResult { a, b })
 }
