@@ -44,7 +44,7 @@ struct AocResult<P1: Display, P2: Display> {
 fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
     f: F,
 ) -> anyhow::Result<()> {
-    const ITERS: usize = 1000;
+    const ITERS: usize = 50;
 
     let start = Instant::now();
     for _ in 0..ITERS {
@@ -70,6 +70,6 @@ fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
 }
 
 fn main() -> anyhow::Result<()> {
-    exec(task10)?;
+    bench(task09)?;
     Ok(())
 }

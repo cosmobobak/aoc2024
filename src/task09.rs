@@ -11,27 +11,29 @@ pub fn task09() -> Result<AocResult<i64, i64>> {
     Ok(AocResult { a, b })
 }
 
+#[derive(Clone, Copy)]
 struct Block {
-    val: i64,
-    start: usize,
-    len: usize,
+    val: i16,
+    start: u16,
+    len: u16,
 }
 
 // this is a horrifically inefficient design.
 #[allow(clippy::cast_possible_wrap, clippy::too_many_lines)]
 fn part_2(task: &str) -> Result<i64, anyhow::Error> {
-    const FREE: i64 = i64::MIN;
+    const FREE: i16 = i16::MIN;
 
-    let mut blocks = vec![Block {
+    let mut blocks = Vec::with_capacity(task.len() * 3 / 2);
+    blocks.push(Block {
         val: FREE,
         start: 0,
         len: 0,
-    }];
+    });
     let mut free = false;
     let mut start = 0;
     let mut val = 0;
     for &byte in task.as_bytes() {
-        let len = (byte - b'0') as usize;
+        let len = u16::from(byte - b'0');
         if len == 0 {
             free = !free;
             continue;
@@ -61,64 +63,64 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
         if try_move == 0 {
             break;
         }
+        let src = blocks[try_move];
         // println!("try_move = {try_move}");
-        if blocks[try_move].val == FREE {
+        if src.val == FREE {
             // empty block
             try_move -= 1;
             continue;
         }
         let mut insert = 0;
         while insert < try_move {
-            if blocks[insert].val != FREE {
+            let tgt = blocks[insert];
+            if tgt.val != FREE {
                 insert += 1;
                 continue;
             }
-            if blocks[insert].len < blocks[try_move].len {
+            if tgt.len < src.len {
                 insert += 1;
                 continue;
             }
             // move the block in:
-            // 0. save the value
-            let val = blocks[try_move].val;
-            let len = blocks[try_move].len;
             // 1. set the source as free-space (or dead space)
             blocks[try_move].val = FREE;
             // 2. unify any free space
-            match (blocks[try_move - 1].val, blocks[try_move + 1].val) {
+            let (l, r) = (blocks[try_move - 1], blocks[try_move + 1]);
+            match (l.val, r.val) {
                 (FREE, FREE) => {
                     // if both free, nuke this one and the right-hand one, expanding the lhs into them.
-                    blocks[try_move - 1].len += blocks[try_move].len + blocks[try_move + 1].len;
+                    blocks[try_move - 1].len += src.len + r.len;
                     blocks.remove(try_move);
                     blocks.remove(try_move);
                     try_move -= 1;
                 }
                 (FREE, _) => {
-                    blocks[try_move - 1].len += blocks[try_move].len;
+                    blocks[try_move - 1].len += src.len;
                     blocks.remove(try_move);
                     try_move -= 1;
                 }
                 (_, FREE) => {
-                    blocks[try_move].len += blocks[try_move + 1].len;
+                    blocks[try_move].len += r.len;
                     blocks.remove(try_move + 1);
                 }
                 _ => {}
             }
             // 3. set the type of the freespace as our stuff
-            blocks[insert].val = val;
+            blocks[insert].val = src.val;
             // 4. either inject remaining freespace or overwrite exactly:
-            if blocks[insert].len != len {
+            if tgt.len != src.len {
                 blocks.insert(
                     insert + 1,
                     Block {
                         val: FREE,
-                        start: blocks[insert].start + len,
-                        len: blocks[insert].len - len,
+                        start: tgt.start + src.len,
+                        len: tgt.len - src.len,
                     },
                 );
                 try_move += 1;
             }
             // 5. set the first section of the freespace
-            blocks[insert].len = len;
+            blocks[insert].len = src.len;
 
             break;
         }
@@ -132,10 +134,10 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
     let mut acc = 0;
     let mut count = 0;
     for block in &blocks {
-        let val = block.len as i64;
+        let val = i64::from(block.len);
         if block.val >= 0 {
-            let lo = count * block.val;
-            let hi = (count + (val - 1)) * block.val;
+            let lo = count * i64::from(block.val);
+            let hi = (count + (val - 1)) * i64::from(block.val);
             acc += (lo + hi) * val / 2;
         }
         count += val;
