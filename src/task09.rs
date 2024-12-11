@@ -14,7 +14,6 @@ pub fn task09() -> Result<AocResult<i64, i64>> {
 #[derive(Clone, Copy)]
 struct Block {
     val: i16,
-    start: u16,
     len: u16,
 }
 
@@ -26,11 +25,9 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
     let mut blocks = Vec::with_capacity(task.len() * 3 / 2);
     blocks.push(Block {
         val: FREE,
-        start: 0,
         len: 0,
     });
     let mut free = false;
-    let mut start = 0;
     let mut val = 0;
     for &byte in task.as_bytes() {
         let len = u16::from(byte - b'0');
@@ -41,20 +38,17 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
         if free {
             blocks.push(Block {
                 val: FREE,
-                start,
                 len,
             });
         } else {
-            blocks.push(Block { val, start, len });
+            blocks.push(Block { val, len });
             val += 1;
         }
-        start += len;
         free = !free;
     }
     // padding
     blocks.push(Block {
         val: FREE,
-        start: 0,
         len: 0,
     });
 
@@ -113,7 +107,6 @@ fn part_2(task: &str) -> Result<i64, anyhow::Error> {
                     insert + 1,
                     Block {
                         val: FREE,
-                        start: tgt.start + src.len,
                         len: tgt.len - src.len,
                     },
                 );
