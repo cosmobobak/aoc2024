@@ -18,11 +18,6 @@ impl Task {
         let (t1, t2) = self.t;
 
         let determinant = a1 * b2 - a2 * b1;
-
-        if determinant == 0 {
-            return None;
-        }
-    
         let v1 = (t1 * b2 - t2 * b1) / determinant;
         let v2 = (a1 * t2 - a2 * t1) / determinant;
 
@@ -30,7 +25,7 @@ impl Task {
             return None;
         }
 
-        if !(a1 * v1 + b1 * v2 == t1 && a2 * v1 + b2 * v2 == t2) {
+        if a1 * v1 + b1 * v2 != t1 || a2 * v1 + b2 * v2 != t2 {
             return None;
         }
 
