@@ -12,7 +12,7 @@ struct Task {
 impl Task {
     // find the minimal ratio (by score) that will satisfy
     // a * v1 + b * v2 = t. Returns None if no solution is possible.
-    const fn minimal<const MAX: i64>(self) -> Option<(i64, i64)> {
+    const fn solve<const MAX: i64>(self) -> i64 {
         let (a1, a2) = self.a;
         let (b1, b2) = self.b;
         let (t1, t2) = self.t;
@@ -22,14 +22,14 @@ impl Task {
         let v2 = (a1 * t2 - a2 * t1) / determinant;
 
         if v1 > MAX || v2 > MAX {
-            return None;
+            return 0;
         }
 
         if a1 * v1 + b1 * v2 != t1 || a2 * v1 + b2 * v2 != t2 {
-            return None;
+            return 0;
         }
 
-        Some((v1, v2))
+        v1 * 3 + v2
     }
 }
 
@@ -40,17 +40,11 @@ pub fn task13() -> Result<AocResult<i64, i64>> {
     let (a, b) = task
         .split("\n\n")
         .filter_map(|block| {
-            let [rule1, rule2, target] = block.lines().collect::<Vec<_>>()[..] else {
-                return None;
-            };
+            let [rule1, rule2, target] = block.lines().collect::<Vec<_>>().try_into().ok()?;
 
-            let rule1 = rule1.split_once(": ")?.1;
-            let rule2 = rule2.split_once(": ")?.1;
-            let target = target.split_once(": ")?.1;
-
-            let (r1x, r1y) = rule1.split_once(", ")?;
-            let (r2x, r2y) = rule2.split_once(", ")?;
-            let (tx, ty) = target.split_once(", ")?;
+            let (r1x, r1y) = rule1.split_once(": ")?.1.split_once(", ")?;
+            let (r2x, r2y) = rule2.split_once(": ")?.1.split_once(", ")?;
+            let (tx, ty) = target.split_once(": ")?.1.split_once(", ")?;
 
             let r1x = r1x.trim_start_matches(['X', '+']).parse().ok()?;
             let r1y = r1y.trim_start_matches(['Y', '+']).parse().ok()?;
@@ -66,14 +60,8 @@ pub fn task13() -> Result<AocResult<i64, i64>> {
 
             Some((Task { a, b, t: t1 }, Task { a, b, t: t2 }))
         })
-        .map(|(t1, t2)| {
-            (
-                Task::minimal::<100>(t1).unwrap_or((0, 0)),
-                Task::minimal::<{ i64::MAX }>(t2).unwrap_or((0, 0)),
-            )
-        })
-        .map(|((a1, b1), (a2, b2))| ((a1 * 3 + b1), (a2 * 3 + b2)))
-        .fold((0i64, 0i64), |acc, x| (acc.0 + x.0, acc.1 + x.1));
+        .map(|(t1, t2)| (Task::solve::<100>(t1), Task::solve::<{ i64::MAX }>(t2)))
+        .fold((0, 0), |acc, x| (acc.0 + x.0, acc.1 + x.1));
 
     Ok(AocResult { a, b })
 }
