@@ -2,35 +2,20 @@ use anyhow::{bail, Context, Result};
 
 use crate::AocResult;
 
-#[derive(Clone, Copy)]
-struct Task {
-    a: (i64, i64),
-    b: (i64, i64),
-    t: (i64, i64),
-}
+// find the minimal ratio (by score) that will satisfy
+// a * v1 + b * v2 = t. Returns None if no solution is possible.
+const fn solve<const MAX: i64>(
+    ((a1, a2), (b1, b2), (t1, t2)): ((i64, i64), (i64, i64), (i64, i64)),
+) -> i64 {
+    let determinant = a1 * b2 - a2 * b1;
+    let v1 = (t1 * b2 - t2 * b1) / determinant;
+    let v2 = (a1 * t2 - a2 * t1) / determinant;
 
-impl Task {
-    // find the minimal ratio (by score) that will satisfy
-    // a * v1 + b * v2 = t. Returns None if no solution is possible.
-    const fn solve<const MAX: i64>(self) -> i64 {
-        let (a1, a2) = self.a;
-        let (b1, b2) = self.b;
-        let (t1, t2) = self.t;
-
-        let determinant = a1 * b2 - a2 * b1;
-        let v1 = (t1 * b2 - t2 * b1) / determinant;
-        let v2 = (a1 * t2 - a2 * t1) / determinant;
-
-        if v1 > MAX || v2 > MAX {
-            return 0;
-        }
-
-        if a1 * v1 + b1 * v2 != t1 || a2 * v1 + b2 * v2 != t2 {
-            return 0;
-        }
-
-        v1 * 3 + v2
+    if v1 > MAX || v2 > MAX || a1 * v1 + b1 * v2 != t1 || a2 * v1 + b2 * v2 != t2 {
+        return 0;
     }
+
+    v1 * 3 + v2
 }
 
 #[allow(clippy::similar_names)]
@@ -58,9 +43,9 @@ pub fn task13() -> Result<AocResult<i64, i64>> {
             let t1 = (tx, ty);
             let t2 = (tx + 10_000_000_000_000, ty + 10_000_000_000_000);
 
-            Some((Task { a, b, t: t1 }, Task { a, b, t: t2 }))
+            Some(((a, b, t1), (a, b, t2)))
         })
-        .map(|(t1, t2)| (Task::solve::<100>(t1), Task::solve::<{ i64::MAX }>(t2)))
+        .map(|(t1, t2)| (solve::<100>(t1), solve::<{ i64::MAX }>(t2)))
         .fold((0, 0), |acc, x| (acc.0 + x.0, acc.1 + x.1));
 
     Ok(AocResult { a, b })
