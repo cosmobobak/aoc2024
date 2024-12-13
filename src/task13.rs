@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use nom::AsChar;
 
 use crate::AocResult;
 
@@ -25,18 +26,31 @@ pub fn task13() -> Result<AocResult<i64, i64>> {
     let (a, b) = task
         .split("\n\n")
         .filter_map(|block| {
-            let [rule1, rule2, target] = block.lines().collect::<Vec<_>>().try_into().ok()?;
-
-            let (r1x, r1y) = rule1.split_once(": ")?.1.split_once(", ")?;
-            let (r2x, r2y) = rule2.split_once(": ")?.1.split_once(", ")?;
-            let (tx, ty) = target.split_once(": ")?.1.split_once(", ")?;
-
-            let r1x = r1x.trim_start_matches(['X', '+']).parse().ok()?;
-            let r1y = r1y.trim_start_matches(['Y', '+']).parse().ok()?;
-            let r2x = r2x.trim_start_matches(['X', '+']).parse().ok()?;
-            let r2y = r2y.trim_start_matches(['Y', '+']).parse().ok()?;
-            let tx = tx.trim_start_matches(['X', '=']).parse().ok()?;
-            let ty = ty.trim_start_matches(['Y', '=']).parse().ok()?;
+            let mut in_int = false;
+            let mut start = 0;
+            let [r1x, r1y, r2x, r2y, tx, ty] = block
+                .as_bytes()
+                .iter()
+                .enumerate()
+                .filter_map(|(i, b)| {
+                    let digit = b.is_dec_digit();
+                    if in_int && !digit {
+                        in_int = false;
+                        return Some(&block[start..i]);
+                    } else if in_int && i + 1 == block.len() {
+                        in_int = false;
+                        return Some(&block[start..i + 1]);
+                    } else if !in_int && digit {
+                        start = i;
+                        in_int = true;
+                    }
+                    None
+                })
+                .map(str::parse)
+                .collect::<Result<Vec<_>, _>>()
+                .ok()?
+                .try_into()
+                .ok()?;
 
             let a = (r1x, r1y);
             let b = (r2x, r2y);
