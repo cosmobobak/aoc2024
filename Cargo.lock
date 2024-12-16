@@ -16,6 +16,7 @@ dependencies = [
  "arrayvec",
  "bitvec",
  "fxhash",
+ "graphsearch",
  "nom",
 ]
 
@@ -57,6 +58,11 @@ checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
 dependencies = [
  "byteorder",
 ]
+
+[[package]]
+name = "graphsearch"
+version = "0.1.0"
+source = "git+https://github.com/cosmobobak/graphsearch#c06f6217e59f7b7201f7c0ede1c0b86f89ad5494"
 
 [[package]]
 name = "memchr"
