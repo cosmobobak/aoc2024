@@ -51,10 +51,11 @@ struct AocResult<P1: Display, P2: Display> {
     b: P2,
 }
 
+#[allow(clippy::cast_precision_loss)]
 fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
     f: F,
 ) -> anyhow::Result<()> {
-    const ITERS: usize = 200;
+    const ITERS: usize = 2000;
 
     let start = Instant::now();
     for _ in 0..ITERS {
@@ -63,6 +64,7 @@ fn bench<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>
     let elapsed = start.elapsed();
 
     println!("Elapsed: {:.3}ms", elapsed.as_secs_f64() * 1000.0);
+    println!("Mean execution time: {:.3}ms", elapsed.as_secs_f64() * 1000.0 / ITERS as f64);
 
     Ok(())
 }
@@ -80,6 +82,6 @@ fn exec<P1: Display, P2: Display, F: Fn() -> anyhow::Result<AocResult<P1, P2>>>(
 }
 
 fn main() -> anyhow::Result<()> {
-    exec(task16)?;
+    exec(task01)?;
     Ok(())
 }

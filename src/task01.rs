@@ -5,10 +5,10 @@ use crate::AocResult;
 pub fn task01() -> Result<AocResult<u32, i32>> {
     let task = std::hint::black_box(include_str!("../tasks/task01.txt"));
 
-    let mut ls = Vec::new();
-    let mut rs = Vec::new();
-    let mut keys = Vec::new();
-    let mut vals = Vec::new();
+    let mut ls = Vec::with_capacity(1000);
+    let mut rs = Vec::with_capacity(1000);
+    let mut keys = Vec::with_capacity(1000);
+    let mut vals = Vec::with_capacity(1000);
 
     for line in task.lines() {
         let [l, r] = line
@@ -21,7 +21,9 @@ pub fn task01() -> Result<AocResult<u32, i32>> {
 
         ls.push(l);
         rs.push(r);
+    }
 
+    for &r in &rs {
         if let Some(i) = keys.iter().position(|&k| k == r) {
             vals[i] += 1;
         } else {
