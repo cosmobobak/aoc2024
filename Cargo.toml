@@ -10,6 +10,7 @@ bitvec = "1.0.1"
 fxhash = "0.2.1"
 nom = "7.1.3"
 graphsearch = { git = "https://github.com/cosmobobak/graphsearch" }
+regex = "1.11.1"
 
 [profile.release]
 # debug = true
