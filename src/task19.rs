@@ -40,7 +40,7 @@ pub fn task19() -> Result<AocResult<i64, i64>> {
     let mut cache = FxHashMap::default();
     for line in text.lines() {
         let ways = munch(&dictionary, line, &mut cache) as i64;
-        a += i64::from(ways > 1);
+        a += i64::from(ways > 0);
         b += ways;
     }
 
